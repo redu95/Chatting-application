@@ -1,7 +1,7 @@
 import java.net.*;
 import java.io.*;
 
-class Server{
+class Server {
 
     ServerSocket server;
     Socket socket;
@@ -9,32 +9,35 @@ class Server{
     BufferedReader br;
     PrintWriter out;
 
+    // Constructor
+    public Server() {
 
-    // Constructer
-    public Server(){
-        
         try {
+            // Create a server socket on port 7777
             server = new ServerSocket(7777);
             System.out.println("Server is ready to accept connection");
             System.out.println("waiting...");
+            
+            // Accept client connection
             socket = server.accept();
 
+            // Set up input and output streams for communication
             br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
 
+            // Start reading and writing threads
             startReading();
-            startWrinting();
+            startWriting();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    public void startReading(){
-        //thread that read the data
-        Runnable r1 =()->{
-            System.out.println("reader started...");
+    // Thread to read messages from the client
+    public void startReading() {
+        Runnable r1 = () -> {
+            System.out.println("Reader started...");
 
             try {
                 while (true) {
@@ -44,27 +47,27 @@ class Server{
                         socket.close();
                         break;
                     }
-                    System.out.println("Client : " + msg);
-                }   
+                    System.out.println("Client: " + msg);
+                }
             } catch (Exception e) {
-                //e.printStackTrace();
                 System.out.println("Connection Closed");
             }
-            
+
         };
         new Thread(r1).start();
     }
 
-    public void startWrinting(){
-        //thread that send the data which the client talk
-        Runnable r2 =()->{
-            System.out.println("writer started...");
+    // Thread to write messages to the client
+    public void startWriting() {
+        Runnable r2 = () -> {
+            System.out.println("Writer started...");
 
-           try {
-             while (!socket.isClosed()) {
+            try {
+                while (!socket.isClosed()) {
                     BufferedReader br1 = new BufferedReader(new InputStreamReader(System.in));
-                    String content =br1.readLine();
+                    String content = br1.readLine();
 
+                    // Send the message to the client
                     out.println(content);
                     out.flush();
 
@@ -72,21 +75,17 @@ class Server{
                         socket.close();
                         break;
                     }
+                }
+            } catch (Exception e) {
+                System.out.println("Connection Closed");
             }
-           } catch (Exception e) {
-              //e.printStackTrace();
-              System.out.println("Connection Closed");
-           }
-           
-            
         };
 
         new Thread(r2).start();
-
     }
 
     public static void main(String[] args) {
-        System.out.println("this is server... going to start server");
+        System.out.println("This is the server... Going to start the server");
         new Server();
     }
 }
